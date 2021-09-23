@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+ "http://mybatis.org/dtd/mybatis-3-mapper.dtd"> 
+ <!-- 이름 지정하는 명령 공간 namespace를 사용하는 이유 이름 겹치게 안할려고 -->
+<mapper namespace="com.ezen.bigdata3.model.ConsumerManageMapper"> 
+
+	<select id="ManagerlistConsumer" resultType="ConsumerDTO"> 
+	 	select * from (select rownum rn, A.* from (select * from consumer where not consumer_name = '관리자' order by CONSUMER_UID) A) where rn between #{startRow} and #{endRow}
+	</select> 
+	
+	<select id = "ManagersearchConsumer" parameterType = "String" resultType="ConsumerDTO">
+		select * from consumer where ${consumersearch} = #{consumerString}
+	</select>
+	
+	<select id = "ManagergetConsumer" parameterType = "String" resultType="ConsumerDTO">
+		select * from consumer where consumer_uid = #{consumer_UID}
+	</select>
+
+	<update id ="ManagerupdateConsumer" parameterType = "ConsumerDTO">
+		update consumer set consumer_name=#{consumer_Name}, consumer_id=#{consumer_ID}, consumer_password=#{consumer_Password}, consumer_email=#{consumer_Email}, consumer_phone=#{consumer_Phone} where consumer_uid = #{consumer_UID} 
+	</update>
+	
+	<delete id = "ManagerdeleteConsumer" parameterType = "String">
+		delete from consumer where consumer_uid = #{consumer_UID}
+	</delete>
+	
+	<select id = "ManagerconsumergetCount" resultType = "int">
+	 	select count(*) from consumer
+	 </select>
+	 
+	  <select id = "Managerconsumeridcheck" resultType = "int">
+	 	select count(*) from consumer where consumer_id = #{consumer_ID}
+	 </select>
+	 
+</mapper>

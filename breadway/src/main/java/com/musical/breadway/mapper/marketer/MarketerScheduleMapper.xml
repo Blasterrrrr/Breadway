@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper
+	PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.musical.breadway.mapper.marketer.MarketerScheduleMapper">
+
+
+	<insert id="insert_schedule" parameterType="ScheduleDTO">
+		insert into schedule values(schedule_seq.nextval, #{schedule_Date}, #{schedule_Time}, #{show_ID}, #{role_Set}, 0)
+	</insert>
+	
+	<select id="list_schedule" resultType="ScheduleDTO">
+		select * from schedule where show_ID=#{show_ID} order by schedule_Date
+	</select>
+	
+	<select id="get_scheduledCasts" parameterType="String" resultType="java.util.LinkedHashMap">
+		select * from ${show_Role_Table_Name} where role_Set=#{role_Set}
+	</select>
+	
+	<select id="get_schedule" resultType="ScheduleDTO">
+		select * from schedule where schedule_ID=#{schedule_ID}
+	</select>
+	
+	<update id="cancelReserve_bySch" parameterType="ReserveDTO"><!-- 스케줄 취소로 다 예매취소해야 하는 경우 -->
+		update reserve set reserve_status=0, reserve_cancel_date=sysdate where schedule_ID=#{schedule_ID}
+	</update>
+	
+	<delete id="delete_allSeat" parameterType="Integer">
+		delete seat where schedule_ID=#{schedule_ID}
+	</delete>
+	
+	<delete id="delete_schedule" parameterType="Integer">
+		delete schedule where schedule_ID=#{schedule_ID}
+	</delete>
+	
+	<update id="update_schedule" parameterType="ScheduleDTO">
+		update schedule set schedule_Date=#{schedule_Date}, schedule_Time=#{schedule_Time}, role_Set=#{role_Set} where schedule_ID=#{schedule_ID}
+	</update>
+
+	
+	
+</mapper>

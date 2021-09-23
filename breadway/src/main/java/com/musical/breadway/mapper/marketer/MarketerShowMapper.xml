@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper
+	PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.musical.breadway.mapper.marketer.MarketerShowMapper">
+	
+	
+<!-- show -->
+	<select id="list_allShow" parameterType="Integer" resultType="ShowDTO">
+		select * from show where Marketer_UID=#{marketer_UID} and show_status between 0 and 3
+	</select>
+	
+	<select id="list_Theatre" resultType="TheatreDTO">
+		select * from theatre
+	</select>
+	
+	<select id="list_Area" resultType="AreaDTO">
+		select * from area
+	</select>
+	
+	<select id="get_TheatreName" resultType="String">
+		select theatre_Name from theatre where Theatre_ID=#{Theatre_ID}
+	</select>
+	
+   	<select id="list_showDetail" parameterType="Integer" resultType="ShowDTO">
+		select * from show where show_ID=#{show_ID}
+	</select>
+	
+	<insert id="insert_show" parameterType="ShowDTO">
+	insert into show values(show_seq.nextval, #{show_Name}, #{show_Role_Table_Name}, #{show_Organizer}, #{theatre_ID}, #{startDate}, #{endDate}, #{genre}, #{rate}, #{duration}, #{detail}, #{notice}, #{show_Status}, #{marketer_UID}, #{posterName}, #{videoLink})
+	</insert>
+	
+	<select id="get_showID" parameterType="String" resultType="Integer">
+		select show_ID from show where show_Role_Table_Name=#{show_Role_Table_Name}
+	</select>
+
+	<update id="update_show" parameterType="ShowDTO">
+		update show set Theatre_ID=#{theatre_ID}, startDate=#{startDate}, endDate=#{endDate}, genre=#{genre}, rate=#{rate}, duration=#{duration}, detail=#{detail}, notice=#{notice}, posterName=#{posterName}, videoLink=#{videoLink}, show_Status=#{show_Status} where show_ID=#{show_ID}
+	</update>
+	
+	<select id="get_allReserved" parameterType="Integer" resultType="Integer">
+		select count(*) from reserve where show_ID=#{show_ID} and reserve_status=1
+	</select>
+	
+	<update id="delete_show" parameterType="Integer">
+		update show set show_status=3 where show_ID=#{show_ID}
+	</update>
+	
+	<insert id="create_roleT" parameterType="String">
+		${sql}
+	</insert>
+	
+	<insert id="insert_role" parameterType="String">
+		${sql}
+	</insert>
+	
+	
+</mapper>

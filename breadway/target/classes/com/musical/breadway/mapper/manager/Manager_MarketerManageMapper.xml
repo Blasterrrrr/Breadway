@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+ "http://mybatis.org/dtd/mybatis-3-mapper.dtd"> 
+ <!-- 이름 지정하는 명령 공간 namespace를 사용하는 이유 이름 겹치게 안할려고 -->
+<mapper namespace="com.ezen.bigdata3.model.Manager_MarketerManageMapper"> 
+
+	<select id="ManagerlistMarketer" parameterType="String" resultType="MarketerDTO"> 
+	 	select * from (select rownum rn, A.* from (SELECT * FROM MARKETER WHERE NOT MARKETER_NAME = '관리자' order by marketer_UID) A) where rn between #{startRow} and #{endRow}
+	</select> 
+	
+	<update id = "ManagerstatusCheck" parameterType = "int">
+	 	update marketer set marketer_status = 1 where marketer_UID = #{marketer_UID}
+	 </update>
+	
+	<select id = "ManagersearchMarketer" parameterType = "String" resultType = "MarketerDTO">
+		select * from marketer where ${marketersearch} = #{marketerString}
+	</select>
+	 
+	 <select id= "ManagergetMarketer" parameterType = "String" resultType = "MarketerDTO">
+	 	select * from marketer where marketer_UID = #{marketer_UID}
+	 </select>
+	 
+	 <update id ="ManagerupdateMarketer" parameterType = "MarketerDTO">
+	 	update marketer set marketer_id=#{marketer_ID}, marketer_password=#{marketer_Password}, marketer_name=#{marketer_Name}, marketer_email=#{marketer_Email}, marketer_phone=#{marketer_Phone} where marketer_UID = #{marketer_UID}
+	 </update>
+	 
+	 <delete id = "ManagerdeleteMarketer" parameterType= "String">
+		delete from marketer where marketer_UID = #{marketer_UID}
+	 </delete>
+	 
+	 <select id = "ManagermarketergetCount" resultType = "int">
+	 	select count(*) from marketer
+	 </select>
+	 
+	 <select id = "Managermarketeridcheck" resultType = "int">
+	 	select count(*) from marketer where marketer_id = #{marketer_ID}
+	 </select>
+	 
+	 <select id = "ManagerMypageInfo" resultType = "MarketerDTO">
+	 	select * from marketer where marketer_status = 777
+	 </select>
+	 
+	 <update id = "ManagerMypageInfoUpdate" parameterType = "MarketerDTO">
+	 	update marketer set marketer_id=#{marketer_ID}, marketer_password=#{marketer_Password}, marketer_name=#{marketer_Name}, marketer_email=#{marketer_Email}, marketer_phone=#{marketer_Phone} where marketer_Status = 777
+	 </update>
+	 
+</mapper>

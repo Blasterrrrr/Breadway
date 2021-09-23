@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+	PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+	
+	<mapper namespace="com.musical.breadway.mapper.UserScheduleMapper">
+
+	<select id="findSchedule" parameterType="java.util.Map" resultType="ScheduleDTO2">
+		select * from schedule where schedule_date 
+		between to_date(#{start_date}, 'YYYY-MM-DD') and to_date(#{end_date}) 
+		and show_id = to_number(#{show_id})
+	</select>
+	
+	<select id="findScheduleOne" parameterType="int" resultType="ScheduleDTO2">
+		select * from schedule where schedule_id = #{schedule_id}
+	</select>
+	
+	<update id="updateSeatQtyOnSchedule" parameterType="java.util.Map">
+		update schedule set reserve_seat_qty = reserve_seat_qty + #{reserve_seat_qty} where schedule_id = #{schedule_id}
+	</update>
+</mapper>

@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+	PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.musical.breadway.user.UserReserveMapper">
+
+	
+	<select id="getReserveList" resultType="HashMap" parameterType="Integer">
+		<!-- select * from reserve
+		inner join (select * from seat inner join schedule on seat.schedule_id = schedule.schedule_id where seat_consumer_uid = #{consumer_uid})a on reserve.seat_id=a.seat_id
+		inner join (select * from show inner join theatre on show.theatre_id = theatre.theatre_id)b on reserve.show_id=b.show_id
+		where reserve_status = 1 -->
+		select RESERVE.order_num, b.THEATRE_NAME, b.SHOW_NAME, a.SCHEDULE_TIME, a.SCHEDULE_DATE, RESERVE.SEAT_DISCOUNT, b.POSTERNAME,TO_CHAR(RESERVE.reserve_date, 'YYYY-MM-DD') RESERVE_DATE,
+			LISTAGG(RESERVE.SEAT_ID,',') WITHIN GROUP(ORDER BY NULL) AS SEAT_ID,
+			LISTAGG(RESERVE.SEAT_PRICE,',') WITHIN GROUP(ORDER BY NULL) AS SEAT_PRICE
+		from reserve
+			inner join (select * from seat inner join schedule on seat.schedule_id = schedule.schedule_id where seat_consumer_uid = #{consumer_uid})a on reserve.seat_id=a.seat_id
+			inner join (select * from show inner join theatre on show.theatre_id = theatre.theatre_id)b on reserve.show_id=b.show_id
+		where RESERVE.reserve_status = 1
+		GROUP BY RESERVE.ORDER_NUM, b.THEATRE_NAME, b.SHOW_NAME, a.SCHEDULE_TIME, a.SCHEDULE_DATE, RESERVE.SEAT_DISCOUNT, b.POSTERNAME, RESERVE_DATE
+		ORDER BY ORDER_NUM DESC
+	</select>
+	
+	<select id="getReserveCancelList" resultType="HashMap" parameterType="Integer">
+		select RESERVE.order_num, b.THEATRE_NAME, b.SHOW_NAME, SCHEDULE_TIME, SCHEDULE_DATE,SEAT_DISCOUNT,POSTERNAME,TO_CHAR(reserve_date, 'YYYY-MM-DD') RESERVE_DATE,TO_CHAR(reserve_cancel_date, 'YYYY-MM-DD')RESERVE_CANCEL_DATE,
+			LISTAGG(RESERVE.SEAT_ID,',') WITHIN GROUP(ORDER BY NULL) AS SEAT_ID,
+			LISTAGG(SEAT_PRICE,',') WITHIN GROUP(ORDER BY NULL) AS SEAT_PRICE 
+		from reserve
+		inner join schedule on schedule.schedule_id = reserve.schedule_id
+		inner join (select * from show inner join theatre on show.theatre_id = theatre.theatre_id)b on reserve.show_id=b.show_id
+		where reserve_status = 0 and reserve.consumer_uid = #{consumer_uid}
+		GROUP BY ORDER_NUM, THEATRE_NAME, SHOW_NAME, SCHEDULE_TIME, SCHEDULE_DATE, SEAT_DISCOUNT,POSTERNAME,RESERVE_DATE,RESERVE_CANCEL_DATE
+		ORDER BY ORDER_NUM DESC
+	</select>
+	
+	<select id="reserveShow" resultType="HashMap" parameterType="Integer">
+		select TO_CHAR(reserve_date, 'YYYY-MM-DD')RESERVE_DATE, a.SCHEDULE_DATE, b.THEATRE_NAME, b.SHOW_NAME, a.SEAT_NAME, a.SEAT_PRICE, a.SEAT_DISCOUNT, b.POSTERNAME, a.SCHEDULE_TIME, RESERVE_ID, ORDER_NUM  from reserve 
+		inner join (select TO_CHAR(schedule_date, 'YYYY-MM-DD') SCHEDULE_DATE, show_id, schedule_time, seat_id, seat_name, seat_price, seat_discount from schedule inner join seat on seat.schedule_id = schedule.schedule_id)a on a.seat_id = reserve.seat_id
+		inner join (select * from show inner join theatre on show.theatre_id = theatre.theatre_id)b on b.show_id = reserve.show_id
+		where order_num= #{order_num}
+	</select>
+	
+	<select id="reserveCancelShow" resultType="HashMap" parameterType="Integer">
+		select TO_CHAR(reserve_date, 'YYYY-MM-DD')RESERVE_DATE, TO_CHAR(SCHEDULE_DATE, 'YYYY-MM-DD') SCHEDULE_DATE, b.THEATRE_NAME, b.SHOW_NAME, SEAT_NAME, SEAT_PRICE, SEAT_DISCOUNT, b.POSTERNAME, SCHEDULE_TIME, RESERVE_ID, ORDER_NUM, TO_CHAR(reserve_cancel_date, 'YYYY-MM-DD')RESERVE_CANCEL_DATE  from reserve 
+		inner join schedule on reserve.schedule_id = schedule.schedule_id
+		inner join (select * from show inner join theatre on show.theatre_id = theatre.theatre_id)b on b.show_id = reserve.show_id
+		where order_num= #{order_num}
+	</select>
+	
+	<select id="getReserveData" resultType="HashMap" parameterType="Integer">
+		select * from reserve where order_num=#{order_num}
+	</select>
+	
+	<update id="reserveCancel" parameterType="ReserveDTO">
+		UPDATE RESERVE
+		SET RESERVE_CANCEL_DATE = sysdate, RESERVE_STATUS =0
+		WHERE ORDER_NUM=#{ORDER_NUM}
+	</update>
+	
+	<delete id="SeatDelete" parameterType="Integer">
+		delete from seat where seat_id=#{seat_id}
+	</delete>
+	
+	<insert id="insertReserve" parameterType="java.util.List">
+      insert into reserve(reserve_id, reserve_date, seat_id, seat_name, seat_price,
+      seat_discount, show_id, reserve_status, consumer_uid, order_num, schedule_id)
+      select reserve_seq.nextval, A.* from(
+      <foreach item="item" collection="list" separator="UNION ALL " >
+         select sysdate as reserve_date,
+         to_number('${item.seat_ID}') as seat_id,
+         '${item.seat_Name}' as seat_name,
+         to_number('${item.seat_Price}') as seat_price,
+         to_number('${item.seat_Discount}') as seat_discount,
+         to_number('${item.show_ID}') as show_id,
+         to_number('1') as reserve_status,
+         to_number('${item.consumer_UID}') as consumer_uid,
+         to_number('${item.order_Num}') as order_num,
+         to_number('${item.schedule_ID}') as schedule_id
+         from dual
+      </foreach>) A   
+   </insert>
+
+   <insert id="insertReserveNumber" parameterType="java.util.Map">
+      insert into reserve_user values(reserve_num_seq.nextval, #{user_id})
+   <selectKey keyProperty="reserve_id" resultType="int" order="AFTER">
+         select reserve_num_seq.currval from dual
+   </selectKey>
+   </insert>
+   
+   <select id="findReserveSeat" parameterType="int" resultType="ReserveDTO">
+      select * from reserve where order_num=#{order_num}
+   </select>
+   
+</mapper>

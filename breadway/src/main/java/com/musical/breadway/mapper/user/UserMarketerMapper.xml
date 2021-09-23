@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+	PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+	
+<mapper namespace = "com.musical.breadway.user.UserMarketerMapper">
+	
+	<insert id = "insertMarketer" parameterType = "marketerDTO">
+		insert into marketer values(marketer_seq.nextval,#{marketer_ID},#{marketer_Password},#{marketer_Name},#{marketer_Email},#{marketer_Phone},-1,#{authKey})
+	</insert>
+	<select id = "checkMarketer"  parameterType = "java.util.Map" resultType = "marketerDTO">
+		select *from marketer where marketer_Name = #{marketer_Name,jdbcType=VARCHAR} and marketer_Email = #{marketer_Email,jdbcType=VARCHAR}
+	</select>
+	<select id = "marketerIDCheck" resultType = "int">
+		select count(*) from marketer where marketer_ID = #{marketer_ID}
+	</select>
+	<update id = "marketerupdateStatus" parameterType = "marketerDTO">
+		update marketer set marketer_Status = #{marketer_Status} where marketer_ID=#{marketer_ID}
+	</update>
+</mapper>

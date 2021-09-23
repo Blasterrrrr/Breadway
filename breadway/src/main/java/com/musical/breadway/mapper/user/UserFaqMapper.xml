@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+	PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.musical.breadway.user.UserFaqMapper">
+
+	<select id="listFAQ" parameterType="int" resultType="FaqDTO">
+		select * from (select rownum rn, A.* from (select * from faq order by num desc) A) where rn between ${startRow} and ${endRow}
+	</select>
+	
+	<select id="selectByKeyword" resultType="FaqDTO">
+		select * from faq where keyword = #{keyword, jdbcType=VARCHAR} 
+
+	</select>
+	
+	<select id="keywordList" parameterType="String" resultType="FaqDTO">
+		SELECT * FROM FAQ WHERE KEYWORD=#{KEYWORD}
+	</select>
+
+	
+	<select id="faqFind" parameterType="String" resultType="FaqDTO">
+		select * from faq
+		where question like '%'||#{question}||'%' 
+	</select>
+
+	<insert id="insertFAQ" parameterType="FaqDTO">
+		insert into faq values(faq_seq.nextval, #{question}, #{answer}, #{keyword})
+	</insert>
+	
+	<delete id="deleteFAQ" parameterType="int">
+		delete from faq where num=#{num}
+	</delete>
+	
+	<select id="getFAQ" parameterType="int" resultType="FaqDTO">
+		select * from faq where num=#{num}
+	</select>
+	
+	<update id="updateFAQ" parameterType="FaqDTO">
+		update faq set question=#{question}, answer=#{answer}, keyword=#{keyword} where num=#{num}
+	</update>
+	
+	<select id="faqgetCount" resultType="int">
+		select count(*) from faq
+	</select>
+	
+	
+</mapper>
+

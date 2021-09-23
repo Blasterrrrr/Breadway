@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+	PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+	
+<mapper namespace = "com.musical.breadway.user.UserConsumerMapper">
+	
+	<insert id = "insertConsumer" parameterType = "consumerDTO">
+		insert into consumer values(consumer_seq.nextval,#{consumer_ID},#{consumer_Password},#{consumer_Name},#{consumer_Email},#{consumer_Phone},100,#{authKey})
+	</insert>
+	<select id = "checkConsumer"  parameterType = "java.util.Map" resultType = "consumerDTO">
+		select *from consumer where consumer_Name = #{consumer_Name,jdbcType=VARCHAR} and consumer_Email = #{consumer_Email,jdbcType=VARCHAR}
+	</select>
+	<select id = "isPassword" parameterType = "java.util.Map" resultType = "consumerDTO">
+		select*from consumer where consumer_UID = #{consumer_UID} and consumer_Password=#{consumer_Password,jdbcType=VARCHAR}
+	</select>
+	
+	<select id = "ConsumerIDCheck" resultType = "int">
+		select count(*) from consumer where consumer_ID = #{consumer_ID}
+	</select>
+	
+	<select id = "editConsumer" resultType = "consumerDTO">
+		select *from consumer where consumer_UID = #{consumer_UID}
+	</select>
+	<select id = "deletePreCheck" resultType = "int">
+		select count(*) from reserve where consumer_UID = #{consumer_UID} and reserve_status = 1
+	</select>
+	<delete id = "deleteConsumer" parameterType = "java.util.Map" >
+		delete from consumer where consumer_UID = #{consumer_UID} and consumer_Password = #{consumer_Password,jdbcType=VARCHAR}
+	</delete>
+	<update id = "updateConsumer" parameterType = "consumerDTO">
+		update consumer set consumer_Password = #{consumer_Password}, consumer_Phone = #{consumer_Phone} where consumer_ID=#{consumer_ID}
+	</update>
+	<update id = "updateStatus" parameterType = "consumerDTO">
+		update consumer set consumer_Status = #{consumer_Status} where consumer_ID = #{consumer_ID}
+	</update>
+</mapper>

@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+ "http://mybatis.org/dtd/mybatis-3-mapper.dtd"> 
+<mapper namespace="com.ezen.bigdata3.model.ShowManageMapper"> 
+	
+	<select id = "ManagerlistShow" parameterType = "String" resultType = "ShowManageDTO">
+		select * from (select rownum rn, A.* from (select * from show inner join theatre on show.theatre_ID = theatre.theatre_ID order by show_id) A) where rn between #{startRow} and #{endRow}
+	</select>
+	
+	<update id = "ManagerupdateShow" parameterType = "ShowManageDTO">
+		update show set show_name = #{show_name,jdbcType=VARCHAR}, show_organizer = #{show_organizer,jdbcType=VARCHAR}, startDate = #{startDate,jdbcType=DATE} ,endDate = #{endDate,jdbcType=DATE} ,genre = #{genre,jdbcType=VARCHAR} ,rate = #{rate,jdbcType=VARCHAR} ,duration = #{duration,jdbcType=INTEGER} ,detail = #{detail,jdbcType=VARCHAR} ,notice =#{notice,jdbcType=VARCHAR}, videoLink = #{videoLink,jdbcType=VARCHAR} where show_id = #{show_ID,jdbcType=INTEGER}
+	</update>
+	
+	<select id = "ManagergetAllTheatreSchedule" resultType = "ShowManageDTO">
+		select * from theatre
+	</select>
+	
+	<select id = "ManagergetAllTheatreShowContent" parameterType = "String" resultType = "ShowManageDTO">
+		select * from show where theatre_id = #{theatre_id}
+	</select>
+	
+	<update id = "ManagerAllTheatreShowGrantChoice" parameterType = "map">
+		update show set show_status = #{modenum} where show_id = #{show_id}
+	</update>
+	
+	<select id = "ManagergetTheatre" parameterType = "String" resultType = "ShowManageDTO">
+		select * from theatre where theatre_id = #{theatre_id}
+	</select>
+	
+	<update id = "ManagerupdateTheatre" parameterType = "ShowManageDTO">
+		update theatre set theatre_name = #{theatre_name}, theatre_address = #{theatre_address}, theatre_areacode = #{theatre_areacode} where theatre_id = #{theatre_id}
+	</update>
+	
+	<update id = "ManagerImageUpdate" parameterType = "String">
+		update show set posterName = #{postername} where show_id = #{show_id}
+	</update>
+	
+	<select id = "ManagersearchShow" parameterType = "String" resultType = "ShowManageDTO">
+		select * from show inner join theatre on show.theatre_ID = theatre.theatre_ID where ${showsearch} like #{showString}
+	</select>
+	
+	<select id= "ManagergetShow" parameterType = "String" resultType = "ShowManageDTO">
+	 	select * from show inner join theatre on show.theatre_ID = theatre.theatre_ID where show_id = #{show_id}
+	</select>
+	
+	<delete id = "ManagerdeleteShow" parameterType = "String">
+		DELETE from show WHERE show_id = #{show_id}
+	</delete>
+	
+	<delete id = "Managerdeleteschedule" parameterType = "String">
+		delete from schedule where show_id = #{show_id}
+	</delete>
+	
+	<delete id = "ManagerdeleteCastinfo" parameterType = "String">
+		DELETE from castinfo WHERE show_id = #{show_id}
+	</delete>
+	
+	<update id="ManagerdeleteRole" parameterType="String">
+        drop table ${value}
+	</update>
+	
+	<select id="ManagershowmaingetCount" resultType="int">
+		select count(*) from show
+	</select>
+	
+	<select id="ManagershowschedulegetCount" parameterType = "int" resultType="int">
+		select count(*) from schedule where show_id = #{show_id}
+	</select>
+	
+	<select id = "Managershowtotalprofit" parameterType = "int" resultType = "ScheduleManageDTO">
+		select * from seat inner join schedule on schedule.schedule_ID = seat.schedule_ID where schedule.show_id = #{show_id}
+	</select>
+	
+	<select id = "Managerseatinfo" parameterType = "String" resultType = "ScheduleManageDTO">
+		select * from (select rownum rn, A.* from (select * from schedule where show_id = #{show_id} order by SCHEDULE_DATE) A) where rn between #{startRow} and #{endRow}
+	</select>
+	
+	<select id = "Managervenue_seatFrame" parameterType = "int" resultType = "Venue_SeatsDTO">
+		select * from venue_seats where theatre_id = (select DISTINCT theatre_id from show inner join schedule on show.show_id = schedule.show_id where show.show_id = #{show_id}) order by venue_id
+	</select>
+	
+	<delete id = "Managerscheduledelete" parameterType = "String">
+		delete from schedule where schedule_id = #{schedule_id} and show_id = #{show_id}
+	</delete>
+	
+	<select id = "Managerscheduleget" parameterType = "String" resultType = "ScheduleManageDTO">
+		select * from schedule where schedule_id = #{schedule_id} and show_id = #{show_id}
+	</select>
+	
+	<update id = "Managerscheduleupdate" parameterType = "ScheduleManageDTO">
+		update schedule set SCHEDULE_DATE = #{schedule_date}, schedule_time = #{schedule_time} where schedule_id = #{schedule_id}
+	</update>
+	
+	<select id = "Managergetseat" parameterType = "String" resultType = "SeatDTO">
+		select * from seat where schedule_ID = #{schedule_id} 
+	</select>
+	
+	<select id = "Managerseatdetail" parameterType = "String" resultType = "SeatDTO">
+		select * from seat inner join consumer on seat.SEAT_CONSUMER_UID = consumer.consumer_uid where seat_id = #{seat_id} 
+	</select>
+	
+	<select id = "Managerseatrequest" parameterType = "String" resultType = "ReserveDTO">
+		select * from (select rownum rn, A.* from (select * from reserve inner join consumer on reserve.consumer_uid = consumer.consumer_uid where show_id = #{show_id} and schedule_id = #{schedule_id} order by reserve_id) A) where rn between #{startRow} and #{endRow}
+	</select>
+	
+	<select id = "Managergetseatrequestcount" parameterType = "String" resultType="int">
+		select count(*) from reserve where show_id = #{show_id} and schedule_id = #{schedule_id}
+	</select>
+	
+	<delete id = "Managerseatrequestcancel" parameterType = "int">
+		DELETE FROM seat a WHERE EXISTS (SELECT 1 FROM reserve b WHERE a.seat_id = b.seat_id AND order_num = #{order_Num})
+	</delete>
+	
+	
+	
+	<select id = "Managerseatrequestcancelordernumcount" parameterType = "int" resultType="int">
+		select count(order_num) from reserve where order_num = #{order_num}
+	</select>
+	
+	<update id ="Managerseatqtyresetschedule" parameterType = "String">
+		update schedule set reserve_seat_qty = 0 where Schedule_ID = #{schedule_id,jdbcType=VARCHAR}
+	</update>
+	
+	<update id = "Managerseatrequestcancelschedule" parameterType = "String">
+		update schedule set reserve_seat_qty = reserve_seat_qty-#{cancelcount,jdbcType=VARCHAR} where Schedule_ID = #{schedule_id,jdbcType=VARCHAR}
+	</update>
+	
+	
+	
+	<update id = "Managerseatrequestcanceldateupdate" parameterType = "int">
+		update reserve set reserve_cancel_date = sysdate, reserve_status = 0 where order_num = #{order_Num} 
+	</update>
+	
+	<select id = "Managerseatrequestcancelcomplete" parameterType = "int" resultType = "ReserveDTO">
+		select * from reserve where order_num = #{order_Num}
+	</select>
+	
+</mapper>

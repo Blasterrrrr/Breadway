@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+	PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.musical.breadway.user.UserShowMapper">
+
+	<select id="getAllShowList" resultType="ShowDTO" >
+		select show_id, show_name, show_organizer, theatre_id, TO_CHAR(startDate, 'YYYY-MM-DD') startDate,
+		TO_CHAR(endDate, 'YYYY-MM-DD') endDate, genre, rate, duration, detail, notice, show_status,
+		 marketer_uid, posterName, videoLink from show
+		 where show_status = 1 
+		 and <![CDATA[enddate >= sysdate-1]]>
+	</select>
+	
+	<select id="getDateShowList" resultType="ShowDTO" parameterType="HashMap" >
+	SELECT * FROM SHOW WHERE NOT (<![CDATA[endDate < TO_DATE(#{selectStartDate}, 'YYYYMMDD')]]> OR <![CDATA[TO_DATE(#{selectEndDate}, 'YYYYMMDD') < startDate]]>)
+
+<!-- 		SELECT
+		TO_CHAR(SCHEDULE_DATE,'YYYY-MM-DD') SCHEDULE_DATE,schedule.SHOW_ID, SHOW_NAME, POSTERNAME,
+		LISTAGG(SCHEDULE_TIME,',') WITHIN GROUP(ORDER BY NULL) AS SCHEDULE_TIME
+		FROM schedule
+		inner join show on show.show_id=schedule.show_id
+		where schedule_date BETWEEN TO_DATE(#{startDate}, 'YYYYMMDD') AND TO_DATE(#{endDate}, 'YYYYMMDD')
+		GROUP BY schedule_Date, schedule.SHOW_ID, SHOW_NAME, POSTERNAME
+		ORDER BY SCHEDULE_DATE ASC -->
+	</select>
+	
+	<select id="genreListShow" parameterType="String" resultType="ShowDTO">
+		select * from show where genre=#{genre} and show_status = 1 
+		 and <![CDATA[enddate >= sysdate-1]]>
+	</select>
+
+	<select id="getFindList" parameterType="java.util.Map" resultType="HashMap">
+		<!-- select * from show inner join
+		(select * from venue inner join theatre on venue.theatre_id=theatre.theatre_id where theatre_address like '%'||#{area}||'%')a
+on  a.venue_id = show.venue_id where show_name like '%'||#{show_name}||'%' -->
+		select * from show inner join
+		theatre on show.theatre_id = theatre.theatre_id
+		where show_name like '%'||#{show_Name, jdbcType=VARCHAR}||'%' and theatre_address like '%'||#{area}||'%'  and <![CDATA[enddate >= sysdate-1]]>
+	</select>
+	
+	<select id="getMainFindList" parameterType="java.util.Map" resultType="HashMap">
+	select * from show inner join
+	theatre on show.theatre_id = theatre.theatre_id
+	where show_name like '%'||#{show_name}||'%' and show_status = 1 
+		 and <![CDATA[enddate >= sysdate-1]]>
+	</select>
+	
+	<!-- 공연정보 -->
+	<select id = "getShow" resultType = "HashMap">
+		select*from show
+		inner join theatre on show.theatre_ID = theatre.theatre_ID
+		where show.show_ID = #{show_ID}
+	</select>
+	<select id = "getPlace" parameterType ="int" resultType = "theatreDTO">
+		select * from theatre where theatre_ID = #{theatre_ID}
+	</select>
+	<select id = "getPart" parameterType ="int" resultType = "castInfoDTO">
+		select*from castinfo where show_ID = #{show_ID}
+	</select>
+	
+	<!-- 공연에 대한 후기작성 -->
+	<insert id = "insertReview" parameterType = "ReviewDTO">
+		insert into review values(#{show_ID},review_seq.nextval,#{view_date},#{rev_subject},#{writer}, #{score},#{rev_content},sysdate)
+		<!-- insert into review values(review_seq.nextval, #{show_ID},#{view_date},#{rev_subject},#{writer}, #{score},#{content},#{re_step},#{re_level},reg_date,readcount) -->
+	</insert>
+<!-- 	<select id = "viewDate" resultType="HashMap">
+		select distinct show_ID,show_Name,TO_CHAR(schedule_date, 'YYYY-MM-DD') SCHEDULE_DATE,schedule_Time,reserve_status from reserve
+		inner join schedule on reserve.schedule_ID = schedule.schedule_ID
+		inner join show on reserve.show_ID = show.show_ID
+		inner join consumer on reserve.consumer_UID = consumer.consumer_UID
+		where reserve.consumer_UID= #{consumer_UID} and reserve.reserve_status = 1
+	</select> -->
+	
+	   <select id = "viewDate" resultType="HashMap">
+      select  DISTINCT reserve.show_ID,show_Name,TO_CHAR(schedule_date, 'YYYY-MM-DD') SCHEDULE_DATE,schedule_Time,reserve_status,reserve.order_num from reserve
+      inner join schedule on reserve.schedule_ID = schedule.schedule_ID
+      inner join show on reserve.show_ID = show.show_ID
+      inner join consumer on reserve.consumer_UID = consumer.consumer_UID
+      where reserve.consumer_UID= #{consumer_UID} and reserve.reserve_status = 1
+   </select>
+	
+	<select id = "reserveCheck" resultType = "int">
+		select count(*) from reserve where show_ID = #{show_ID} and consumer_UID = #{consumer_UID} and reserve_status=1
+	</select>
+	<select id = "writeCheck" parameterType = "map" resultType ="reviewDTO">
+		select show_ID,TO_CHAR(VIEW_DATE, 'YYYY-MM-DD')view_date,writer from review where show_ID = #{show_ID} and view_date = #{view_date} and writer=#{writer, jdbcType=VARCHAR}
+	</select>
+	<select id = "listReview" parameterType = "HashMap" resultType = "reviewDTO">
+		select*from (select rownum rn,A.*from(select*from review where show_ID = #{show_ID} order by num desc)A) where rn between ${startRow} and ${endRow}
+	</select>
+	<select id = "findReview" parameterType = "java.util.Map" resultType = "reviewDTO">
+		select*from review where ${search} = #{searchString}
+	</select>
+	<select id = "getReview" resultType = "java.util.HashMap">
+		select review.show_ID,num,TO_CHAR(VIEW_DATE, 'YYYY-MM-DD')view_date,rev_subject,writer,score,rev_content,reg_date,show_Name from review 
+		inner join show on review.show_ID = show.show_ID
+		where num = #{num}
+	</select>
+	<delete id="deleteReview" parameterType = "int">
+		delete from review where num = #{num} 
+	</delete>
+	<update id ="updateReview" parameterType = "reviewDTO">
+		update review set rev_subject = #{rev_subject},rev_content = #{rev_content},score = #{score} where num = #{num}
+	</update>
+	<select id = "getReviewCount" resultType = "int">
+		select count(*) from review where show_ID = #{show_ID}
+	</select>
+	
+	<!-- 공연에 대한 문의사항 작성 -->
+	<insert id = "insertQuest" parameterType = "questDTO">
+		insert into quest values(#{show_ID},QUEST_SEQ.NEXTVAL,sysdate,#{qna_subject},#{qna_content},' ',#{writer})
+		<!-- insert into review values(review_seq.nextval, #{show_ID},#{view_date},#{rev_subject},#{writer}, #{score},#{content},#{re_step},#{re_level}) -->
+	</insert>
+	<select id = "showMarketer" resultType = "showDTO">
+		select marketer_UID from show where show_ID = #{show_ID}	
+	</select>
+	<update id = "reContent" parameterType = "questDTO">
+		update quest set qna_reContent = #{qna_reContent} where num=#{num}
+	</update>
+	<select id = "listQuest" parameterType = "int" resultType = "questDTO">
+		select*from (select rownum rn,A.*from(select*from quest where show_ID = #{show_ID} order by num desc)A) where rn between ${startRow} and ${endRow}
+	</select>
+	<delete id="deleteQuest" parameterType = "int">
+		delete from quest where num = #{num} 
+	</delete>
+	<select id = "getQuest" parameterType = "int" resultType = "questDTO">
+		select*from quest where num = #{num}
+	</select>
+	
+	<update id="updateQuest" parameterType="questDTO">
+	UPDATE QUEST
+		SET SHOW_ID=#{show_ID}, NUM=#{num}, REG_DATE=sysdate, QNA_SUBJECT=#{qna_subject}, QNA_CONTENT=#{qna_content}, QNA_RECONTENT=#{qna_reContent, jdbcType=VARCHAR}, WRITER=#{writer} where num=#{num}
+	</update>
+	<select id = "findQuest" parameterType = "String" resultType = "questDTO">
+		select*from quest where qna_content like '%'||#{searcgString}||'%'
+	</select>
+	<select id = "getQuestCount" resultType = "int">
+		select count(*) from quest where show_ID=#{show_ID}
+	</select>
+</mapper>

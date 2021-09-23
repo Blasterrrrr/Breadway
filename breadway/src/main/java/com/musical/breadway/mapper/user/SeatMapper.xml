@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+	PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+	
+	<mapper namespace="com.musical.book.model.SeatMapper">
+
+	<!-- <select id="searchSeatSection" parameterType="int" resultType="Venue_SeatsDTO">
+		with schedule_tmp as (select show_id from schedule where schedule_id=#{schedule_id}),
+			 show_tmp as (select B.theatre_id from schedule_tmp A, show B where B.show_id=A.show_id),
+			 seat_tmp as (select A.* from venue_seats A, show_tmp B where A.theatre_id = B.theatre_id )
+		select * from seat_tmp
+	</select> -->
+	
+	<select id="searchSeatSection" parameterType="int" resultType="Venue_SeatsDTO">
+      with schedule_tmp as (select show_id from schedule where schedule_id=#{schedule_id}),
+          show_tmp as (select B.theatre_id from schedule_tmp A, show B where B.show_id=A.show_id),
+          seat_tmp as (select A.* from venue_seats A, show_tmp B where A.theatre_id = B.theatre_id )
+      select * from seat_tmp order by seat_tmp.venue_ID
+   </select>
+   
+	<select id="findSeatPrice" parameterType="java.util.Map" resultType="Venue_SeatsDTO">
+		select * from venue_seats where seat_section=#{seat_section} and venue_id=to_number(#{venue_id})
+	</select>
+	
+	<select id="searchCurrentStatusOfSeats" parameterType="java.util.Map" resultType="SeatDTO">
+		select * from seat where seat_number>=#{seat_section} and schedule_id=to_number(#{schedule_id})
+	</select>
+	
+	<select id="findCurrentStatusOfSeat" parameterType="java.util.Map" resultType="SeatDTO">
+		select * from seat where seat_number=#{seat_number} and schedule_id=to_number(#{schedule_id})
+	</select>
+	
+	<insert id="insertReserveSeat" parameterType="java.util.List">
+		insert into seat(seat_id, seat_number, seat_name, seat_price, seat_discount, schedule_id, seat_consumer_uid)
+		select seat_seq.nextval, A.* from(
+		<foreach item="item" collection="list" separator="UNION ALL " >
+			select '${item.seat_Number}' as seat_number,
+			'${item.seat_Name}' as seat_name,
+			to_number('${item.seat_Price}') as seat_price,
+			to_number('${item.seat_Discount}') as seat_discount,
+			to_number('${item.schedule_ID}') as schedule_id,
+			to_number('${item.seat_Consumer_UID}') as seat_consumer_uid
+			from dual
+		</foreach>) A	
+	</insert>
+
+	<select id="findSeatKey" parameterType="java.util.List" resultType="SeatDTO">
+		select * from seat where schedule_id = #{schedule_id} and seat_number in
+		<foreach item="item" index="index" collection="list" open="(" close=")" separator=",">
+			'${item.seat_Number}'
+		</foreach>
+	</select>
+	
+	<select id="findVenueSeatQty" parameterType="int" resultType="Venue_SeatsDTO">
+		select seat_qty from venue_seats where theatre_id=#{theatre_id}
+	</select>
+	
+	
+</mapper>

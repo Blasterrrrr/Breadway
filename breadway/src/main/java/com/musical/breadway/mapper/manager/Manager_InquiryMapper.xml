@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+	PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ezen.bigdata3.model.InquiryMapper">
+
+	<select id="ManagerlistInquiry" parameterType="int" resultType="InquiryDTO">
+		select * from (select rownum rn, A.* from (select * from inquiry order by num) A) where rn between ${startRow} and ${endRow}
+	</select>
+
+	<select id = "Managerinquirykeyword" parameterType = "String" resultType="InquiryDTO">
+		select * from inquiry where subject like #{keyword}
+	</select>
+
+	<insert id="ManagerinsertInquiry" parameterType="InquiryDTO">
+		insert into inquiry values(0,inq_seq.nextval, sysdate, #{name}, #{email}, #{subject}, #{content}, 1, #{re_level}, #{re_group})
+	</insert>
+	
+	<delete id="ManagerdeleteInquiry" parameterType="int">
+		delete from inquiry where num=#{num}
+	</delete>
+	
+	<update id = "ManagerupdateInquiry" parameterType = "InquiryDTO">
+		update inquiry set inqdate=sysdate, name =#{name,jdbcType=VARCHAR}, email=#{email,jdbcType=VARCHAR}, subject = #{subject,jdbcType=VARCHAR}, content = #{content,jdbcType=VARCHAR}, re_step = 1 where num =#{num} and re_level = #{re_level} and re_group = #{re_group}
+	</update>
+	
+	<select id="ManagergetInquiry" parameterType="int" resultType="InquiryDTO">
+		select * from inquiry where num = #{num} and re_step = #{re_step} and re_level = #{re_level} and re_group = #{re_group}
+ 	</select>
+	
+	<select id="ManagerinqgetCount" resultType="int">
+		select count(*) from inquiry
+	</select>
+	
+</mapper>
+

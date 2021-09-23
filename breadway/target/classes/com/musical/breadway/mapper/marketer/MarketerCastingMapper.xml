@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper
+	PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.musical.breadway.mapper.marketer.MarketerCastingMapper">
+
+
+<!-- castinfo -->
+	<select id="get_roleList" parameterType="String" resultType="java.util.LinkedHashMap">
+		select * from (select * from ${show_Role_Table_Name} order by role_set) where rownum=1
+	</select>
+	
+	<insert id="insert_castInfo" parameterType="CastInfoDTO">
+		insert into castInfo values(castInfo_seq.nextval,  #{show_ID}, #{cast_Part}, #{cast_Name}, #{cast_PhotoName})
+	</insert>
+	
+	<select id="list_castInfo" resultType="CastInfoDTO">
+		select * from castInfo where show_ID=#{show_ID} order by cast_Part
+	</select>
+	
+	<update id="update_cast" parameterType="CastInfoDTO">
+		update castInfo set cast_Part=#{cast_Part}, cast_Name=#{cast_Name}, cast_PhotoName=#{cast_PhotoName} where cast_ID=#{cast_ID}
+	</update>
+	
+	<select id="get_castInfo" resultType="CastInfoDTO">
+		select * from castInfo where cast_ID=#{cast_ID}
+	</select>
+	
+	<select id="searchByRole" resultType="CastInfoDTO">
+		select * from castInfo where cast_Part=#{cast_Part}
+	</select>
+	
+	<select id="get_castPhotoName" resultType="String">
+		select cast_PhotoName from castInfo where cast_ID=#{cast_ID}
+	</select>
+	
+	<delete id="delete_cast" parameterType="Integer">
+		delete castInfo where cast_ID=#{cast_ID}
+	</delete>
+	
+	
+	
+<!-- casting pattern -->
+	<select id="count_roleSet" parameterType="String" resultType="Integer">
+		select count(*) from ${show_Role_Table_Name}
+	</select>
+	
+	<select id="get_allCastPattern" parameterType="String" resultType="java.util.LinkedHashMap">
+		select * from (select * from ${show_Role_Table_Name} order by role_set)
+	</select>
+	
+	<delete id="delete_castPattern" parameterType="java.util.Map">
+		delete ${show_Role_Table_Name} where role_Set=#{pNum}
+	</delete>
+	
+	
+	
+</mapper>

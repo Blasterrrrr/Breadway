@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper
+	PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.musical.breadway.mapper.marketer.MarketerProfitMapper">
+
+
+	<select id="showgetCount" resultType="Integer">
+		select count(*) from schedule where show_ID=#{show_ID}
+	</select>
+	
+	<select id="seatinfo" parameterType="String" resultType="ScheduleDTO">
+		select * from (select rownum rn, A.* from (select * from schedule where show_ID=#{show_ID} order by SCHEDULE_DATE) A) where rn between #{startRow} and #{endRow}
+	</select>
+	
+	<select id="venue_seatFrame" parameterType="Integer" resultType="Venue_seatsDTO">
+		select * from venue_seats where theatre_ID=(select DISTINCT theatre_ID from show inner join schedule on show.show_ID=schedule.show_ID where show.show_ID=#{show_ID}) order by venue_ID
+	</select>
+	
+	<select id="get_allSeat" parameterType="String" resultType="SeatDTO">
+		select * from seat where schedule_ID in (select DISTINCT schedule_ID from schedule inner join show on schedule.show_ID=show.show_ID where schedule.show_ID=#{show_ID})
+	</select>
+	
+	<select id="getseat" parameterType="Integer" resultType="SeatDTO">
+		select * from seat where schedule_ID=#{schedule_ID}
+	</select>
+	
+	<select id="get_consumerUID" resultType="Integer">
+		select consumer_UID from reserve where seat_ID=#{seat_ID}
+	</select>
+	
+	<select id="seatdetail" parameterType="Integer" resultType="ReserveDTO">
+		select * from reserve where seat_ID=#{seat_ID}
+	</select>
+	
+	<select id="get_consumerInfo" parameterType="Integer" resultType="ConsumerDTO">
+		select * from consumer where consumer_UID=#{consumer_UID}
+	</select>
+	
+	<select id="get_allReservedBySchNum" resultType="ReserveDTO">
+		select * from reserve where schedule_ID=#{schedule_ID} order by order_Num, seat_Name
+	</select>
+	
+	<select id="get_orderNumList" resultType="ReserveDTO"><!-- 한 사람이 여러 좌석 예매 시 order_Num 가져오기 -->
+		select order_Num from reserve where schedule_ID=#{schedule_ID} and consumer_UID=#{consumer_UID}
+	</select>
+	
+	<update id="cancelReserve_byOrder" parameterType="Integer"><!-- 한 사람이 여러 좌석 예매했을 때 한 번에 취소할 경우 -->
+		update reserve set reserve_status=0, reserve_cancel_date=sysdate where order_Num=#{order_Num}
+	</update>
+	
+	<select id="get_seatID" resultType="Integer">
+		select seat_ID from reserve where order_Num=#{order_Num}
+	</select>
+	
+	<delete id="delete_Seat" parameterType="Integer">
+		delete seat where seat_ID=#{seat_ID}
+	</delete>
+	
+	<select id="seatGetCount" resultType="Integer">
+		select count(*) from reserve where order_Num=#{order_Num} and Schedule_ID=#{schedule_ID}
+	</select>
+	
+	<update id="seat_MinusQty" parameterType="java.util.Map">
+		update schedule set reserve_seat_qty=reserve_seat_qty - #{seatCount} where schedule_ID=#{schedule_ID}
+	</update>
+	
+	<select id="get_TotalSeatNum" parameterType="Integer" resultType="Venue_SeatsDTO">
+		select seat_Qty from venue_seats where theatre_ID=(select theatre_ID from show where show_ID=#{show_ID})
+	</select>
+	
+	
+</mapper>

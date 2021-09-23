@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper
+	PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.musical.breadway.mapper.marketer.MarketerProfileMapper">
+
+
+	<select id="profile_list" resultType="MarketerDTO">
+		select * from marketer where Marketer_UID=#{marketer_UID}
+	</select>
+	
+	<update id="profile_update" parameterType="MarketerDTO">
+		update marketer set Marketer_Password=#{marketer_Password}, Marketer_Name=#{marketer_Name}, Marketer_Phone=#{marketer_Phone} where Marketer_UID=#{marketer_UID}
+	</update>
+	
+	
+</mapper>

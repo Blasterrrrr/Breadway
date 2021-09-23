@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+	PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.musical.breadway.user.UserInquiryMapper">
+
+	<select id="listInquiry" parameterType="int" resultType="InquiryDTO">
+<!-- 		select * from (select rownum rn, A.* from (select * from inquiry where TO_NUMBER(#{consumer_uid})= consumer_uid or consumer_uid = 777 order by re_level asc, re_step asc) A) where rn between ${startRow} and ${endRow} -->
+		select * from (select rownum rn, A.* from (select * from inquiry WHERE RE_GROUP IN #{consumer_uid} AND (TO_NUMBER(#{consumer_uid})= consumer_uid) order by re_level desc, re_step asc) A) where rn between ${startRow} and ${endRow}
+	</select>
+	
+	<select id="listInquiryAnswer" parameterType="int" resultType="InquiryDTO">
+<!-- 		select * from (select rownum rn, A.* from (select * from inquiry where TO_NUMBER(#{consumer_uid})= consumer_uid or consumer_uid = 777 order by re_level asc, re_step asc) A) where rn between ${startRow} and ${endRow} -->
+		select * from (select rownum rn, A.* from (select * from inquiry WHERE RE_GROUP IN #{consumer_uid} AND 777 = consumer_uid order by re_level desc, re_step asc) A)
+	</select>
+
+	<select id = "inquirykeyword" parameterType = "String" resultType="InquiryDTO">
+		select * from inquiry where keyword = #{keyword}
+	</select>
+	
+	
+
+	<select id ="maxInquiry" resultType="int">
+		<!-- select max(num) from inquiry 해당 쿼리문은 맨 처음 글을 쓰면 num값이 존재하지 않아 max(num)값이 null반환됨. 아래코드는 max(num)값이 null이면 0으로 치환하겠다는 쿼리문-->
+		select NVL(max(num), 0) from inquiry
+	</select>
+
+	<update id = "setInquiry" parameterType = "InquiryDTO">
+		update inquiry set re_step = re_step + 1 where re_group = #{re_group} and re_step > #{re_step}
+	</update>
+
+	<insert id="insertInquiry" parameterType="InquiryDTO">
+		insert into inquiry values(#{consumer_UID},inq_seq.nextval, sysdate, #{name}, #{email}, #{subject}, #{content}, 0, re_level_Seq.nextval, #{consumer_UID})
+	</insert>
+	
+	<delete id="deleteInquiry" parameterType="int">
+		delete from inquiry where num=#{num}
+	</delete>
+	
+	<update id = "updateInquiry" parameterType = "InquiryDTO">
+		update inquiry set inqdate=sysdate, name =#{name,jdbcType=VARCHAR}, email=#{email,jdbcType=VARCHAR}, subject = #{subject,jdbcType=VARCHAR}, content = #{content,jdbcType=VARCHAR} where num =#{num}
+	</update>
+	
+	<select id="getInquiry" parameterType="int" resultType="InquiryDTO">
+		select * from inquiry where num = #{num} 
+	</select>
+	
+	<select id="getInquiryAnswer" parameterType="int" resultType="InquiryDTO">
+		select * from inquiry where re_level = #{re_level} and re_group=${re_group} and re_step=1 
+	</select>
+	
+	<select id="inqgetCount" resultType="int" parameterType="int">
+		select count(*) from inquiry where consumer_uid=#{consumer_uid}
+	</select>
+	
+</mapper>
+

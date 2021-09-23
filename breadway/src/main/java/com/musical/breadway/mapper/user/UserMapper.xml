@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+	PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+	
+<mapper namespace = "com.ezen.teamproject.model.UserMapper">
+
+	<select id = "consumerLogin" parameterType = "java.util.Map" resultType = "consumerDTO">
+		select *from consumer where consumer_ID = #{consumer_ID,jdbcType=VARCHAR} and consumer_Password = #{consumer_Password,jdbcType=VARCHAR}
+	</select>
+	<select id = "marketerLogin" parameterType = "java.util.Map" resultType = "marketerDTO">
+		select *from marketer where marketer_ID = #{marketer_ID,jdbcType=VARCHAR} and marketer_Password = #{marketer_Password,jdbcType=VARCHAR} 
+	</select>
+	<select id = "CfindID" resultType = "consumerDTO" parameterType = "java.util.Map">
+		select *from consumer where consumer_Name = #{consumer_Name,jdbcType=VARCHAR} and consumer_Email = #{consumer_Email,jdbcType=VARCHAR}
+	</select>
+	<select id = "CfindPW" resultType = "consumerDTO" parameterType = "java.util.Map">
+		select *from consumer where consumer_Name = #{consumer_Name,jdbcType=VARCHAR} and consumer_ID = #{consumer_ID,jdbcType=VARCHAR} and consumer_Email = #{consumer_Email,jdbcType=VARCHAR}
+	</select>
+	<select id = "MfindID" resultType = "marketerDTO" parameterType = "java.util.Map">
+		select *from marketer where marketer_Name = #{marketer_Name,jdbcType=VARCHAR} and marketer_Email = #{marketer_Email,jdbcType=VARCHAR}
+	</select>
+	<select id = "MfindPW" resultType = "marketerDTO" parameterType = "java.util.Map">
+		select *from marketer where marekter_Name = #{marketer_Name,jdbcType=VARCHAR} and marketer_ID = #{marketer_ID,jdbcType=VARCHAR} and marketer_Email = #{marketer_Email,jdbcType=VARCHAR}
+	</select>
+</mapper>
